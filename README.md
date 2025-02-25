@@ -18,3 +18,6 @@ To restore dependencies and run app:
 ```bash
 dotnet run --project .\src\WebApi\
 ```
+
+## References
+[ASP.NET Core clean architecture example](https://github.com/jasontaylordev/CleanArchitecture) by Jason Taylor
