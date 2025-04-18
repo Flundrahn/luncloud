@@ -1,0 +1,63 @@
+﻿@page "/"
+@using System.Net
+@using Domain
+@using static WebClient.Pages.Weather
+
+<PageTitle>Home</PageTitle>
+
+<h1>Hello, world!</h1>
+@if (_errorMessage is not null)
+{
+    <p>Error: @_errorMessage</p>
+    return;
+}
+@if (_weatherForecast is not null)
+{
+    <p>Here is today's weather forecast</p>
+    <ul>
+        <li>Temperature: @_weatherForecast.TemperatureC degrees Celsius</li>
+        <li>Summary: @_weatherForecast.Summary</li>
+    </ul>
+}
+else
+{
+    <span>Loading...</span>
+}
+
+Welcome to your new app.
+
+@code
+{
+    [Inject]
+    public HttpClient _http { get; set; } = null!;
+    private WeatherForecast? _weatherForecast;
+    private string? _errorMessage;
+
+    protected override async Task OnInitializedAsync()
+    {
+        // Johan was here! 👻
+        var response = await _http.GetAsync("https://localhost:7118/weatherforecast");
+        Console.WriteLine(_http.BaseAddress);
+        if (response is null)
+        {
+            _errorMessage = "Response was null";
+            return;
+        }
+
+        if (response.StatusCode is not HttpStatusCode.OK)
+        {
+            _errorMessage = $"{response.StatusCode} {response.ReasonPhrase}";
+            return;
+        }
+
+        var weatherForecasts = await response.Content.ReadFromJsonAsync<WeatherForecast[]>();
+        var responseString = await response.Content.ReadAsStringAsync();
+        if (weatherForecasts is null)
+        {
+            _errorMessage = "Could not parse to WeatherForecast array!";
+            return;
+        }
+
+        _weatherForecast = weatherForecasts[0];
+    }
+}
